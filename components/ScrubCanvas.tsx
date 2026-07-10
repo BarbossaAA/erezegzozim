@@ -23,21 +23,23 @@ type Props = {
   priority?: boolean;
 };
 
-/** decoded bitmaps kept around the playhead; beyond this they are released */
-const WINDOW_AHEAD = 22;
-const WINDOW_BEHIND = 12;
-const EVICT_SLACK = 18;
+/** decode depth in the scrub direction / against it */
+const WINDOW_MAIN = 22;
+const WINDOW_MINOR = 12;
+/** eviction keeps [t-KEEP_SPAN, t+KEEP_SPAN] once MAX_KEPT is exceeded */
+const KEEP_SPAN = 30;
+const MAX_KEPT = 52;
 const MAX_CONCURRENT_DECODES = 3;
 
 /**
  * Scroll-scrubbed frame sequence renderer.
  *
- * Pipeline: fetch frames as compressed Blobs (cheap to keep for the whole
- * session) → decode a sliding window around the playhead into GPU-resident
- * ImageBitmaps → blit from a continuous rAF loop that only runs while the
- * canvas is on screen. drawImage(bitmap) never re-decodes, so scrubbing has
- * no main-thread decode hitches — the "frozen frame" jank of <img>-based
- * scrubbers.
+ * Pipeline: fetch frames as compressed Blobs (playhead-nearest first) →
+ * decode a direction-aware sliding window into GPU-resident ImageBitmaps →
+ * blit from a rAF loop that only runs while the canvas is on screen.
+ * drawImage(bitmap) never re-decodes, so scrubbing has no main-thread
+ * decode hitches. Bitmaps outside the window — and everything except the
+ * anchors when the section scrolls away — are released.
  */
 const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
   { frames, className, eagerCount = 6, ariaLabel, priority = false },
@@ -60,6 +62,7 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
 
     const count = frames.length;
     const blobs: (Blob | null)[] = new Array(count).fill(null);
+    const fetching = new Set<number>();
     const bitmaps = new Map<number, ImageBitmap>();
     const decoding = new Set<number>();
     let disposed = false;
@@ -67,6 +70,15 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
     let running = false;
     let rafId = 0;
     let lastDrawn = -1;
+    let lastTarget = 0;
+    let dir = 1; // scrub direction: +1 forward, -1 backward
+
+    const eagerSet = new Set<number>([0]);
+    for (let k = 1; k < eagerCount; k++) {
+      eagerSet.add(Math.round((k / (eagerCount - 1)) * (count - 1)));
+    }
+
+    const targetIndex = () => Math.round(progressRef.current * (count - 1));
 
     /* ---------- drawing ---------- */
 
@@ -91,49 +103,63 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
       return -1;
     };
 
-    /* ---------- decode scheduling ---------- */
+    /* ---------- decode scheduling (never drops work: re-kicked on every
+       completion, blob arrival, and tick) ---------- */
 
-    const decode = (i: number) => {
-      if (disposed || bitmaps.has(i) || decoding.has(i)) return;
-      const blob = blobs[i];
-      if (!blob || decoding.size >= MAX_CONCURRENT_DECODES) return;
-      decoding.add(i);
-      createImageBitmap(blob)
-        .then((bmp) => {
-          decoding.delete(i);
-          if (disposed) {
-            bmp.close();
-            return;
-          }
-          bitmaps.set(i, bmp);
-          // first available frame → paint immediately even before the loop runs
-          if (lastDrawn === -1) draw(nearestBitmap(targetIndex()));
-        })
-        .catch(() => decoding.delete(i));
+    const wanted = (i: number) =>
+      i >= 0 && i < count && !bitmaps.has(i) && !decoding.has(i) && !!blobs[i];
+
+    const nextDecodeIndex = (): number => {
+      const t = targetIndex();
+      const ahead = dir >= 0 ? WINDOW_MAIN : WINDOW_MINOR;
+      const behind = dir >= 0 ? WINDOW_MINOR : WINDOW_MAIN;
+      const max = Math.max(ahead, behind);
+      for (let d = 0; d <= max; d++) {
+        // movement side gets the slot first at every distance
+        const order = dir >= 0 ? [t + d, t - d] : [t - d, t + d];
+        for (const i of order) {
+          if (i === t + d && d > ahead) continue;
+          if (i === t - d && d > behind) continue;
+          if (wanted(i)) return i;
+        }
+      }
+      for (const i of eagerSet) if (wanted(i)) return i;
+      return -1;
     };
 
-    const targetIndex = () =>
-      Math.round(progressRef.current * (count - 1));
-
-    /** keep the decode window filled and release bitmaps far behind/ahead */
-    const manageWindow = () => {
-      const t = targetIndex();
-      // decode closest-first around the playhead
-      for (let d = 0; d <= WINDOW_AHEAD; d++) {
-        if (decoding.size >= MAX_CONCURRENT_DECODES) break;
-        const fwd = t + d;
-        if (fwd < count) decode(fwd);
-        const back = t - d;
-        if (d > 0 && d <= WINDOW_BEHIND && back >= 0) decode(back);
+    const kick = () => {
+      if (disposed) return;
+      while (decoding.size < MAX_CONCURRENT_DECODES) {
+        const i = nextDecodeIndex();
+        if (i < 0) break;
+        decoding.add(i);
+        createImageBitmap(blobs[i] as Blob)
+          .then((bmp) => {
+            decoding.delete(i);
+            if (disposed) {
+              bmp.close();
+              return;
+            }
+            bitmaps.set(i, bmp);
+            // first available frame → paint before the loop's next tick
+            if (lastDrawn === -1) draw(nearestBitmap(targetIndex()));
+            kick();
+          })
+          .catch(() => {
+            decoding.delete(i);
+            kick();
+          });
       }
-      // evict far-away bitmaps (never the eager anchors)
-      if (bitmaps.size > WINDOW_AHEAD + WINDOW_BEHIND + EVICT_SLACK) {
-        for (const [i, bmp] of bitmaps) {
-          if (eagerSet.has(i)) continue;
-          if (i < t - WINDOW_BEHIND - EVICT_SLACK || i > t + WINDOW_AHEAD + EVICT_SLACK) {
-            bmp.close();
-            bitmaps.delete(i);
-          }
+    };
+
+    const evict = (keepSpan: number, floor: number) => {
+      if (bitmaps.size <= floor) return;
+      const t = targetIndex();
+      for (const [i, bmp] of bitmaps) {
+        if (eagerSet.has(i) || i === lastDrawn) continue;
+        if (i < t - keepSpan || i > t + keepSpan) {
+          bmp.close();
+          bitmaps.delete(i);
         }
       }
     };
@@ -142,8 +168,14 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
 
     const tick = () => {
       if (!running || disposed) return;
-      manageWindow();
-      const best = nearestBitmap(targetIndex());
+      const t = targetIndex();
+      if (t !== lastTarget) {
+        dir = t > lastTarget ? 1 : -1;
+        lastTarget = t;
+      }
+      kick();
+      evict(KEEP_SPAN, MAX_KEPT);
+      const best = nearestBitmap(t);
       if (best >= 0 && best !== lastDrawn) draw(best);
       rafId = requestAnimationFrame(tick);
     };
@@ -158,23 +190,38 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
       cancelAnimationFrame(rafId);
     };
 
-    /* ---------- fetching ---------- */
+    /* ---------- fetching: playhead-nearest first ---------- */
 
-    const eagerSet = new Set<number>([0]);
-    for (let k = 1; k < eagerCount; k++) {
-      eagerSet.add(Math.round((k / (eagerCount - 1)) * (count - 1)));
-    }
+    const nextFetchIndex = (): number => {
+      const t = targetIndex();
+      let best = -1;
+      let bestScore = Infinity;
+      for (let i = 0; i < count; i++) {
+        if (blobs[i] || fetching.has(i)) continue;
+        const delta = i - t;
+        const onMovementSide = dir >= 0 ? delta >= 0 : delta <= 0;
+        const score = Math.abs(delta) * (onMovementSide ? 1 : 1.5);
+        if (score < bestScore) {
+          bestScore = score;
+          best = i;
+        }
+      }
+      return best;
+    };
 
     const fetchFrame = async (i: number) => {
-      if (disposed || blobs[i]) return;
+      if (disposed || blobs[i] || fetching.has(i)) return;
+      fetching.add(i);
       try {
         const res = await fetch(frames[i]);
-        if (!res.ok) return;
-        blobs[i] = await res.blob();
-        // eager anchors decode as soon as they arrive
-        if (eagerSet.has(i)) decode(i);
+        if (res.ok) {
+          blobs[i] = await res.blob();
+          kick();
+        }
       } catch {
         /* transient network failure — nearest-frame fallback covers it */
+      } finally {
+        fetching.delete(i);
       }
     };
 
@@ -182,11 +229,11 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
       if (streaming || disposed) return;
       streaming = true;
       await Promise.all([...eagerSet].map(fetchFrame));
-      const queue = frames.map((_, i) => i).filter((i) => !blobs[i]);
       const workers = new Array(4).fill(0).map(async () => {
-        while (queue.length && !disposed) {
-          const i = queue.shift();
-          if (i !== undefined) await fetchFrame(i);
+        while (!disposed) {
+          const i = nextFetchIndex();
+          if (i < 0) break;
+          await fetchFrame(i);
         }
       });
       await Promise.all(workers);
@@ -218,16 +265,19 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
 
     if (reduced) {
       // static poster only — no timeline ever scrubs this canvas
-      fetchFrame(0).then(() => decode(0));
+      fetchFrame(0).then(kick);
     } else {
-      // render loop + streaming follow visibility
       io = new IntersectionObserver(
-        ([entry]) => {
+        (entries) => {
+          // batched records: only the NEWEST reflects current visibility
+          const entry = entries[entries.length - 1];
           if (entry.isIntersecting) {
             stream();
             startLoop();
           } else {
             stopLoop();
+            // free decoded frames; blobs stay, so re-entry re-decodes fast
+            evict(0, 0);
           }
         },
         { rootMargin: priority ? "300% 0px" : "150% 0px" }
