@@ -140,10 +140,11 @@
 .hero-smoke {
   position: absolute;
   inset: -12%;
+  /* soft radial gradients only — a filter: blur() here costs a full-viewport
+     GPU pass on every parallax frame */
   background:
-    radial-gradient(60% 45% at 30% 85%, rgba(227, 154, 59, 0.10), transparent 70%),
-    radial-gradient(50% 40% at 75% 80%, rgba(234, 231, 224, 0.05), transparent 70%);
-  filter: blur(6px);
+    radial-gradient(60% 45% at 30% 85%, rgba(227, 154, 59, 0.10), transparent 72%),
+    radial-gradient(50% 40% at 75% 80%, rgba(234, 231, 224, 0.05), transparent 72%);
 }
 .hero-vignette {
   position: absolute;

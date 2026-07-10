@@ -207,15 +207,14 @@ img, video, canvas, svg {
   inset: -60px;
   z-index: 120;
   pointer-events: none;
-  opacity: 0.5;
-  mix-blend-mode: overlay;
+  /* plain alpha grain: blend modes force whole-viewport backdrop compositing
+     on every frame anything beneath changes (scrub canvases, videos, Lenis) */
+  opacity: 0.16;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   animation: grain-shift 0.9s steps(4) infinite;
 }
-/* mobile / coarse pointers: keep the texture but drop the expensive blend */
 @media (hover: none), (pointer: coarse), (max-width: 900px) {
   .grain {
-    mix-blend-mode: normal;
     opacity: 0.1;
   }
 }
@@ -345,6 +344,6 @@ img, video, canvas, svg {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .grain { animation: none; opacity: 0.3; }
+  .grain { animation: none; opacity: 0.1; }
   .cursor-lamp { display: none; }
 }

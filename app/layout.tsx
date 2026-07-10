@@ -108,6 +108,14 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} ${suez.variable}`}>
       <body>
+        {/* LCP assets — React hoists these into <head> */}
+        <link
+          rel="preload"
+          as="image"
+          href="/media/facade-night.webp"
+          fetchPriority="high"
+        />
+        <link rel="preload" as="image" href="/media/frames/hero/f_0001.webp" />
         <a href="#main" className="skip-link">
           דילוג לתוכן הראשי
         </a>

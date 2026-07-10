@@ -112,7 +112,8 @@ const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // 1.5 cap: frames are 1280w, so higher canvas density only adds draw cost
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const w = Math.round(rect.width * dpr);
       const h = Math.round(rect.height * dpr);
       if (canvas.width !== w || canvas.height !== h) {
