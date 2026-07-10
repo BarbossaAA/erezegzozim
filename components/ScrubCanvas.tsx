@@ -16,162 +16,233 @@ export type ScrubCanvasHandle = {
 type Props = {
   frames: string[];
   className?: string;
-  /** frames loaded eagerly before the rest stream in */
+  /** frames decoded eagerly (spread across the sequence) for instant feedback */
   eagerCount?: number;
   ariaLabel?: string;
   /** start streaming immediately instead of waiting to approach the viewport */
   priority?: boolean;
 };
 
+/** decoded bitmaps kept around the playhead; beyond this they are released */
+const WINDOW_AHEAD = 22;
+const WINDOW_BEHIND = 12;
+const EVICT_SLACK = 18;
+const MAX_CONCURRENT_DECODES = 3;
+
 /**
- * Canvas frame-sequence scrubber. Streaming starts only when the canvas
- * approaches the viewport (unless `priority`), frames are decoded off the
- * draw path, and under prefers-reduced-motion only the first frame loads.
- * Drawing always falls back to the nearest loaded frame so scrubbing never
- * blanks out while assets are still arriving.
+ * Scroll-scrubbed frame sequence renderer.
+ *
+ * Pipeline: fetch frames as compressed Blobs (cheap to keep for the whole
+ * session) → decode a sliding window around the playhead into GPU-resident
+ * ImageBitmaps → blit from a continuous rAF loop that only runs while the
+ * canvas is on screen. drawImage(bitmap) never re-decodes, so scrubbing has
+ * no main-thread decode hitches — the "frozen frame" jank of <img>-based
+ * scrubbers.
  */
 const ScrubCanvas = forwardRef<ScrubCanvasHandle, Props>(function ScrubCanvas(
   { frames, className, eagerCount = 6, ariaLabel, priority = false },
   ref
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
-  const loadedRef = useRef<boolean[]>([]);
-  const currentIndexRef = useRef(0);
-  const rafRef = useRef(0);
-
-  const draw = (index: number) => {
-    const canvas = canvasRef.current;
-    const img = imagesRef.current[index];
-    if (!canvas || !img || !loadedRef.current[index]) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const { width: cw, height: ch } = canvas;
-    if (cw === 0 || ch === 0) return;
-    // cover-fit
-    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const dw = img.naturalWidth * scale;
-    const dh = img.naturalHeight * scale;
-    ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
-  };
-
-  const nearestLoaded = (target: number): number => {
-    if (loadedRef.current[target]) return target;
-    for (let d = 1; d < frames.length; d++) {
-      if (loadedRef.current[target - d]) return target - d;
-      if (loadedRef.current[target + d]) return target + d;
-    }
-    return -1;
-  };
+  const progressRef = useRef(0);
 
   useImperativeHandle(ref, () => ({
     setProgress(p: number) {
-      const target = Math.round(
-        Math.min(1, Math.max(0, p)) * (frames.length - 1)
-      );
-      const index = nearestLoaded(target);
-      if (index < 0 || index === currentIndexRef.current) return;
-      currentIndexRef.current = index;
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => draw(index));
+      progressRef.current = Math.min(1, Math.max(0, p));
     },
   }));
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
 
-    imagesRef.current = new Array(frames.length).fill(null);
-    loadedRef.current = new Array(frames.length).fill(false);
+    const count = frames.length;
+    const blobs: (Blob | null)[] = new Array(count).fill(null);
+    const bitmaps = new Map<number, ImageBitmap>();
+    const decoding = new Set<number>();
     let disposed = false;
     let streaming = false;
+    let running = false;
+    let rafId = 0;
+    let lastDrawn = -1;
 
-    const load = (i: number) =>
-      new Promise<void>((resolve) => {
-        if (disposed || imagesRef.current[i]) return resolve();
-        const img = new Image();
-        img.src = frames[i];
-        const done = () => {
-          if (disposed) return resolve();
-          imagesRef.current[i] = img;
-          loadedRef.current[i] = true;
-          // if we're waiting on this frame (or first paint), draw it
-          const target = currentIndexRef.current;
-          if (i === target || !loadedRef.current[target]) draw(nearestLoaded(target));
-          resolve();
-        };
-        // decode() waits for fetch + decode off the draw path
-        img
-          .decode()
-          .then(done)
-          .catch(() => {
-            if (img.complete && img.naturalWidth > 0) done();
-            else resolve();
-          });
+    /* ---------- drawing ---------- */
+
+    const draw = (index: number) => {
+      const bmp = bitmaps.get(index);
+      if (!bmp) return;
+      const { width: cw, height: ch } = canvas;
+      if (cw === 0 || ch === 0) return;
+      const scale = Math.max(cw / bmp.width, ch / bmp.height);
+      const dw = bmp.width * scale;
+      const dh = bmp.height * scale;
+      ctx.drawImage(bmp, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+      lastDrawn = index;
+    };
+
+    const nearestBitmap = (target: number): number => {
+      if (bitmaps.has(target)) return target;
+      for (let d = 1; d < count; d++) {
+        if (bitmaps.has(target - d)) return target - d;
+        if (bitmaps.has(target + d)) return target + d;
+      }
+      return -1;
+    };
+
+    /* ---------- decode scheduling ---------- */
+
+    const decode = (i: number) => {
+      if (disposed || bitmaps.has(i) || decoding.has(i)) return;
+      const blob = blobs[i];
+      if (!blob || decoding.size >= MAX_CONCURRENT_DECODES) return;
+      decoding.add(i);
+      createImageBitmap(blob)
+        .then((bmp) => {
+          decoding.delete(i);
+          if (disposed) {
+            bmp.close();
+            return;
+          }
+          bitmaps.set(i, bmp);
+          // first available frame → paint immediately even before the loop runs
+          if (lastDrawn === -1) draw(nearestBitmap(targetIndex()));
+        })
+        .catch(() => decoding.delete(i));
+    };
+
+    const targetIndex = () =>
+      Math.round(progressRef.current * (count - 1));
+
+    /** keep the decode window filled and release bitmaps far behind/ahead */
+    const manageWindow = () => {
+      const t = targetIndex();
+      // decode closest-first around the playhead
+      for (let d = 0; d <= WINDOW_AHEAD; d++) {
+        if (decoding.size >= MAX_CONCURRENT_DECODES) break;
+        const fwd = t + d;
+        if (fwd < count) decode(fwd);
+        const back = t - d;
+        if (d > 0 && d <= WINDOW_BEHIND && back >= 0) decode(back);
+      }
+      // evict far-away bitmaps (never the eager anchors)
+      if (bitmaps.size > WINDOW_AHEAD + WINDOW_BEHIND + EVICT_SLACK) {
+        for (const [i, bmp] of bitmaps) {
+          if (eagerSet.has(i)) continue;
+          if (i < t - WINDOW_BEHIND - EVICT_SLACK || i > t + WINDOW_AHEAD + EVICT_SLACK) {
+            bmp.close();
+            bitmaps.delete(i);
+          }
+        }
+      }
+    };
+
+    /* ---------- render loop (runs only while on screen) ---------- */
+
+    const tick = () => {
+      if (!running || disposed) return;
+      manageWindow();
+      const best = nearestBitmap(targetIndex());
+      if (best >= 0 && best !== lastDrawn) draw(best);
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const startLoop = () => {
+      if (running || disposed) return;
+      running = true;
+      rafId = requestAnimationFrame(tick);
+    };
+    const stopLoop = () => {
+      running = false;
+      cancelAnimationFrame(rafId);
+    };
+
+    /* ---------- fetching ---------- */
+
+    const eagerSet = new Set<number>([0]);
+    for (let k = 1; k < eagerCount; k++) {
+      eagerSet.add(Math.round((k / (eagerCount - 1)) * (count - 1)));
+    }
+
+    const fetchFrame = async (i: number) => {
+      if (disposed || blobs[i]) return;
+      try {
+        const res = await fetch(frames[i]);
+        if (!res.ok) return;
+        blobs[i] = await res.blob();
+        // eager anchors decode as soon as they arrive
+        if (eagerSet.has(i)) decode(i);
+      } catch {
+        /* transient network failure — nearest-frame fallback covers it */
+      }
+    };
+
+    const stream = async () => {
+      if (streaming || disposed) return;
+      streaming = true;
+      await Promise.all([...eagerSet].map(fetchFrame));
+      const queue = frames.map((_, i) => i).filter((i) => !blobs[i]);
+      const workers = new Array(4).fill(0).map(async () => {
+        while (queue.length && !disposed) {
+          const i = queue.shift();
+          if (i !== undefined) await fetchFrame(i);
+        }
       });
+      await Promise.all(workers);
+    };
+
+    /* ---------- sizing ---------- */
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      // 1.5 cap: frames are 1280w, so higher canvas density only adds draw cost
+      // frames are 1280w — higher canvas density only adds blit cost
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const w = Math.round(rect.width * dpr);
       const h = Math.round(rect.height * dpr);
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
+        lastDrawn = -1; // force redraw at new size
+        draw(nearestBitmap(targetIndex()));
       }
-      draw(nearestLoaded(currentIndexRef.current));
     };
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     resize();
 
-    const stream = async () => {
-      if (streaming || disposed) return;
-      streaming = true;
-      // eager: frames spread across the sequence for instant scrub feedback
-      const eager: number[] = [0];
-      for (let k = 1; k < eagerCount; k++) {
-        eager.push(Math.round((k / (eagerCount - 1)) * (frames.length - 1)));
-      }
-      await Promise.all(eager.map(load));
-      // stream the rest with limited concurrency
-      const queue = frames.map((_, i) => i).filter((i) => !loadedRef.current[i]);
-      const workers = new Array(4).fill(0).map(async () => {
-        while (queue.length && !disposed) {
-          const i = queue.shift();
-          if (i !== undefined) await load(i);
-        }
-      });
-      await Promise.all(workers);
-    };
+    /* ---------- lifecycle ---------- */
 
+    const reduced = prefersReducedMotion();
     let io: IntersectionObserver | null = null;
-    if (prefersReducedMotion()) {
-      // static poster only — no timeline will ever scrub this canvas
-      load(0);
-    } else if (priority) {
-      stream();
+
+    if (reduced) {
+      // static poster only — no timeline ever scrubs this canvas
+      fetchFrame(0).then(() => decode(0));
     } else {
-      // begin streaming when the section approaches the viewport
+      // render loop + streaming follow visibility
       io = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
             stream();
-            io?.disconnect();
-            io = null;
+            startLoop();
+          } else {
+            stopLoop();
           }
         },
-        { rootMargin: "150% 0px" }
+        { rootMargin: priority ? "300% 0px" : "150% 0px" }
       );
       io.observe(canvas);
+      if (priority) stream();
     }
 
     return () => {
       disposed = true;
+      stopLoop();
       ro.disconnect();
       io?.disconnect();
-      cancelAnimationFrame(rafRef.current);
+      bitmaps.forEach((bmp) => bmp.close());
+      bitmaps.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frames, priority]);

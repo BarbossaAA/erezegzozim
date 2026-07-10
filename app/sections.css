@@ -16,8 +16,9 @@
   transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
 }
 .site-header.is-scrolled {
-  background: rgba(7, 7, 8, 0.72);
-  backdrop-filter: blur(14px);
+  /* solid tint — a backdrop blur here re-filters the strip on every frame
+     of the scrub canvases beneath it */
+  background: rgba(7, 7, 8, 0.88);
   border-bottom: 1px solid var(--line-dim);
   padding-block: 10px;
 }

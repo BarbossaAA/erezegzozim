@@ -153,8 +153,7 @@ img, video, canvas, svg {
 .btn-ghost {
   border: 1px solid var(--line);
   color: var(--ink);
-  background: rgba(12, 12, 14, 0.5);
-  backdrop-filter: blur(6px);
+  background: rgba(12, 12, 14, 0.72);
 }
 .btn-ghost:hover {
   border-color: var(--amber);
@@ -281,9 +280,8 @@ img, video, canvas, svg {
   display: flex;
   gap: 8px;
   padding: 8px;
-  background: rgba(10, 10, 12, 0.78);
+  background: rgba(10, 10, 12, 0.92);
   border: 1px solid var(--line-dim);
-  backdrop-filter: blur(14px);
   border-radius: 999px;
   inset-inline-start: 50%;
   transform: translate(50%, 0);
