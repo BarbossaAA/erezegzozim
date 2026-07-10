@@ -1,0 +1,24 @@
+# dependencies / build
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# local env
+.env
+.env.*
+
+# local tooling
+.claude/
+
+# heavy generation sources (job IDs + CDN URLs live in assets-src/manifest.json)
+assets-src/*.mp4
+assets-src/*.png
+assets-src/*.webp
+assets-src/*.jpg
+
+# logs / OS noise
+*.log
+Thumbs.db
+.DS_Store
