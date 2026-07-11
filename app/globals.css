@@ -163,7 +163,7 @@ img, video, canvas, svg {
 /* ---------- section primitives ---------- */
 .section {
   position: relative;
-  padding: clamp(90px, 14vh, 160px) 0;
+  padding: clamp(64px, 9vh, 110px) 0;
 }
 
 .kicker {
@@ -194,12 +194,6 @@ img, video, canvas, svg {
   margin-top: 18px;
 }
 
-/* track-in typography: children words animate via GSAP */
-.track-in .word {
-  display: inline-block;
-  will-change: transform, opacity;
-}
-
 /* ---------- film grain ---------- */
 .grain {
   position: fixed;
@@ -223,54 +217,6 @@ img, video, canvas, svg {
   50% { transform: translate(14px, -20px); }
   75% { transform: translate(-10px, -8px); }
   100% { transform: translate(0, 0); }
-}
-
-/* ---------- letterbox ---------- */
-.letterbox-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: clamp(38px, 6.5vh, 84px);
-  background: #000;
-  z-index: 110;
-  pointer-events: none;
-  will-change: transform;
-}
-.letterbox-top { top: 0; transform: translateY(-101%); }
-.letterbox-bottom { bottom: 0; transform: translateY(101%); }
-
-/* ---------- cursor lamp (desktop only) ---------- */
-.cursor-lamp {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 130;
-  width: 340px;
-  height: 340px;
-  margin: -170px 0 0 -170px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(
-    circle,
-    rgba(255, 180, 94, 0.14) 0%,
-    rgba(255, 180, 94, 0.05) 38%,
-    transparent 68%
-  );
-  mix-blend-mode: screen;
-  transition: opacity 0.6s;
-}
-.cursor-lamp::after {
-  content: "";
-  position: absolute;
-  inset: 45%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 214, 160, 0.5), transparent 70%);
-  filter: blur(6px);
-}
-.cursor-lamp.is-on { opacity: 1; }
-@media (hover: none), (pointer: coarse), (max-width: 900px) {
-  .cursor-lamp { display: none; }
 }
 
 /* ---------- sticky contact bar ---------- */
@@ -343,5 +289,4 @@ img, video, canvas, svg {
     scroll-behavior: auto !important;
   }
   .grain { animation: none; opacity: 0.1; }
-  .cursor-lamp { display: none; }
 }

@@ -116,10 +116,9 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/media/facade-night.webp"
+          href="/media/hero-poster.webp"
           fetchPriority="high"
         />
-        <link rel="preload" as="image" href="/media/frames/hero/f_0001.webp" />
         <a href="#main" className="skip-link">
           דילוג לתוכן הראשי
         </a>

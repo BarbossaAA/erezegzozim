@@ -8,7 +8,7 @@ export default function StickyBar() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const hero = document.getElementById("hero");
+    const hero = document.querySelector("[data-hero]");
     if (!hero) {
       setVisible(true);
       return;

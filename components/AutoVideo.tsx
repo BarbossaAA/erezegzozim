@@ -4,27 +4,47 @@ import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/useReducedMotion";
 
 /**
- * Lazy looping background video: loads + plays only when near the viewport,
- * pauses when away. Falls back to the poster under reduced motion.
+ * Looping background video.
+ * Default: lazy — loads + plays only near the viewport, pauses away.
+ * `eager`: starts loading and playing immediately (hero use).
+ * Under reduced motion only the poster shows.
  */
 export default function AutoVideo({
   src,
   poster,
   className,
+  eager = false,
 }: {
   src: string;
   poster: string;
   className?: string;
+  eager?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
-    if (prefersReducedMotion()) return; // poster only
+    if (prefersReducedMotion()) {
+      video.removeAttribute("src");
+      video.load();
+      return;
+    }
+
+    // React does not always emit the muted ATTRIBUTE in SSR HTML, and Chrome
+    // decides autoplay eligibility from it — force the property before play()
+    video.muted = true;
+    video.defaultMuted = true;
+
+    if (eager) {
+      if (!video.src) video.src = src;
+      video.play().catch(() => {});
+      return;
+    }
 
     const io = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        const entry = entries[entries.length - 1];
         if (entry.isIntersecting) {
           if (!video.src) video.src = src;
           video.play().catch(() => {});
@@ -36,7 +56,7 @@ export default function AutoVideo({
     );
     io.observe(video);
     return () => io.disconnect();
-  }, [src]);
+  }, [src, eager]);
 
   return (
     <video
@@ -46,7 +66,8 @@ export default function AutoVideo({
       muted
       loop
       playsInline
-      preload="none"
+      autoPlay={eager}
+      preload={eager ? "auto" : "none"}
       aria-hidden="true"
       tabIndex={-1}
     />
