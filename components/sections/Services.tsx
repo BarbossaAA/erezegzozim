@@ -56,6 +56,16 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
     desc: "פתרונות בטוחים לכביש, בלי לפגוע בתקינות הרכב.",
     texture: "/media/still-hands.webp",
   },
+  {
+    title: "מערכות בהתאמה אישית",
+    desc: "כיפוף, התאמה וריתוך של צנרת למידה — כשאין חלק מדף.",
+    texture: "/media/still-bench.webp",
+  },
+  {
+    title: "אספנות, שטח ורכבים מיוחדים",
+    desc: "שחזור מסלול מקורי או התוויית מסלול חדש, לפי הרכב והייעוד.",
+    texture: "/media/still-4x4.webp",
+  },
 ];
 
 /** 7. Services — 10 cards over the macro fly-through atmosphere. */

@@ -724,6 +724,84 @@
   .craft-copy, .craft-step { opacity: 1; }
 }
 
+/* ---------- 9b. custom works ---------- */
+.custom-works {
+  background: var(--bg-0);
+  overflow: clip;
+}
+.cw-media {
+  position: absolute;
+  inset: 0;
+}
+.cw-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+}
+.cw-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--bg-0) 3%, rgba(7, 7, 8, 0.68) 40%, var(--bg-0) 97%);
+}
+.cw-measure {
+  position: absolute;
+  top: clamp(70px, 11vh, 130px);
+  inset-inline: 0;
+  width: 100%;
+  height: 60px;
+  pointer-events: none;
+}
+.custom-works .container {
+  position: relative;
+  z-index: 1;
+}
+.cw-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: clamp(44px, 7vh, 80px);
+}
+.cw-card {
+  border: 1px solid var(--line-dim);
+  border-radius: 16px;
+  overflow: clip;
+  background: rgba(10, 10, 12, 0.82);
+  transition: border-color 0.4s, transform 0.4s var(--ease-cine);
+}
+.cw-card:hover {
+  border-color: var(--line);
+  transform: translateY(-4px);
+}
+.cw-card img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: saturate(0.92);
+  transition: transform 1.4s var(--ease-cine);
+}
+.cw-card:hover img {
+  transform: scale(1.04);
+}
+.cw-card-body {
+  padding: 20px 22px 24px;
+}
+.cw-card-body h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.cw-card-body p {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+@media (max-width: 900px) {
+  .cw-grid { grid-template-columns: 1fr; }
+}
+
 /* ---------- 10. sound control ---------- */
 .sound { background: var(--bg-1); }
 .sound-stage {

@@ -11,6 +11,7 @@ import Symptoms from "@/components/sections/Symptoms";
 import Services from "@/components/sections/Services";
 import Exploded from "@/components/sections/Exploded";
 import Craft from "@/components/sections/Craft";
+import CustomWorks from "@/components/sections/CustomWorks";
 import SoundControl from "@/components/sections/SoundControl";
 import Trust from "@/components/sections/Trust";
 import Cases from "@/components/sections/Cases";
@@ -34,6 +35,7 @@ export default function Page() {
         <Services />
         <Exploded />
         <Craft />
+        <CustomWorks />
         <SoundControl />
         <Trust />
         <Cases />
