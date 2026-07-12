@@ -39,7 +39,16 @@ export default function SmoothScroll() {
   useEffect(() => {
     const lenis = lenisRef.current;
     const hash = window.location.hash;
-    const target = hash ? document.querySelector<HTMLElement>(hash) : null;
+    // getElementById never throws — querySelector(hash) would crash on
+    // fragments like "#_=_" (Facebook) or percent-encoded Hebrew anchors
+    let target: HTMLElement | null = null;
+    if (hash) {
+      try {
+        target = document.getElementById(decodeURIComponent(hash.slice(1)));
+      } catch {
+        /* malformed percent-encoding — treat as no target */
+      }
+    }
 
     if (lenis) {
       if (target) lenis.scrollTo(target, { immediate: true });
