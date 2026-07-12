@@ -57,7 +57,9 @@ export default function RouteStrip() {
     <section ref={sectionRef} className="rs" aria-label="מסלול מערכת הפליטה">
       <div className="container rs-copy">
         <p className="kicker">כך אנחנו עובדים</p>
-        <h2 className="h-display">לא מנחשים. עוקבים אחרי כל מסלול הפליטה.</h2>
+        <h2 className="h-display">
+          אנחנו לא מנחשים — עוברים על מסלול הפליטה כולו.
+        </h2>
       </div>
       <div className="rs-stage">
         <svg viewBox="0 0 1060 320" className="rs-svg" aria-hidden="true" focusable="false">

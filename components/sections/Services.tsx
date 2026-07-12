@@ -8,17 +8,17 @@ import AutoVideo from "@/components/AutoVideo";
 const SERVICES: { title: string; desc: string; texture?: string }[] = [
   {
     title: "איתור נזילות פליטה",
-    desc: "בדיקה של חיבורים, צנרת, ריתוכים, דודים וצינור גמיש.",
+    desc: "בדיקה יסודית של החיבורים, הצנרת, הריתוכים והדודים עד שמוצאים את מקור הנזילה.",
     texture: "/media/still-catalytic.webp",
   },
   {
     title: "תיקון והחלפת אגזוזים",
-    desc: "פתרון לרעש חריג, חלודה, חיבורים רופפים ואגזוזים פגומים.",
+    desc: "טיפול ברעש חריג, בחלודה, בחיבורים רופפים ובאגזוזים פגומים.",
     texture: "/media/still-muffler.webp",
   },
   {
     title: "דוד אחורי / דוד מרכזי",
-    desc: "החלפה והתאמה לפי סוג הרכב, רמת הרעש והצורך.",
+    desc: "החלפת דודים והתאמתם לסוג הרכב ולרמת הרעש הרצויה.",
     texture: "/media/still-muffler.webp",
   },
   {
@@ -28,7 +28,7 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
   },
   {
     title: "ריתוך מערכת פליטה",
-    desc: "ריתוך נקי ומדויק לחיזוק, אטימה והתאמה.",
+    desc: "ריתוך נקי ומדויק לחיזוק המערכת, לאטימה ולהתאמות.",
     texture: "/media/still-weld.webp",
   },
   {
@@ -38,16 +38,16 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
   },
   {
     title: "בדיקת ממיר קטליטי",
-    desc: "אבחון תקינות, זרימה, רעשים ותקלות הקשורות לפליטה.",
+    desc: "בדיקת תקינות הממיר וזרימת הגזים, ואיתור תקלות שמעלות את ערכי הפליטה.",
     texture: "/media/still-catalytic.webp",
   },
   {
     title: "הכנה לטסט",
-    desc: "בדיקת רעש, אטימה ומצב מערכת הפליטה לפני בדיקה.",
+    desc: "בדיקת רעש, אטימות ומצב כללי של המערכת לפני מבחן הרישוי.",
     texture: "/media/still-lamp.webp",
   },
   {
-    title: "פתרונות רעש וויברציה",
+    title: "פתרונות רעש ורעידות",
     desc: "איתור מקור הרעש והתאמת פתרון נקודתי.",
     texture: "/media/still-flex.webp",
   },
@@ -58,12 +58,12 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
   },
   {
     title: "מערכות בהתאמה אישית",
-    desc: "כיפוף, התאמה וריתוך של צנרת למידה — כשאין חלק מדף.",
+    desc: "כשאין חלק חילופי, אנחנו בונים אותו: כיפוף צנרת, התאמה וריתוך לפי מידות הרכב.",
     texture: "/media/still-bench.webp",
   },
   {
     title: "אספנות, שטח ורכבים מיוחדים",
-    desc: "שחזור מסלול מקורי או התוויית מסלול חדש, לפי הרכב והייעוד.",
+    desc: "שחזור המערכת המקורית או בניית מסלול חדש, בהתאם לרכב ולשימוש שלו.",
     texture: "/media/still-4x4.webp",
   },
 ];

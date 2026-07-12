@@ -6,11 +6,26 @@ import { prefersReducedMotion } from "@/lib/useReducedMotion";
 import AutoVideo from "@/components/AutoVideo";
 
 const STEPS = [
-  { title: "בדיקה", desc: "מקשיבים לרעש ובודקים את מסלול הפליטה." },
-  { title: "אבחון", desc: "מפרידים בין הסימפטום לבין התקלה האמיתית." },
-  { title: "פתרון", desc: "מסבירים מה לתקן, מה להחליף ומה לא דחוף." },
-  { title: "ביצוע", desc: "ריתוך, החלפה, חיזוק או התאמה לפי מצב הרכב." },
-  { title: "בדיקה חוזרת", desc: "מוודאים אטימה, יציבות ורמת רעש תקינה." },
+  {
+    title: "בדיקה",
+    desc: "אנחנו שומעים את הרעש יחד אתכם ובודקים את המערכת מתחת לרכב.",
+  },
+  {
+    title: "אבחון",
+    desc: "מאתרים את מקור הבעיה עצמו, לא רק את הסימפטום שלה.",
+  },
+  {
+    title: "הצעת פתרון",
+    desc: "מסבירים בשקיפות מה דורש תיקון, מה כדאי להחליף ומה יכול לחכות.",
+  },
+  {
+    title: "ביצוע",
+    desc: "מבצעים את העבודה — ריתוך, החלפה או התאמה, לפי הצורך.",
+  },
+  {
+    title: "בדיקה חוזרת",
+    desc: "בודקים שוב את האטימות, היציבות ורמת הרעש לפני שהרכב חוזר אליכם.",
+  },
 ];
 
 /** The five working steps, revealed once — welding footage alongside. */
@@ -42,7 +57,7 @@ export default function CraftSteps() {
         <div>
           <div className="cs-copy">
             <p className="kicker">העבודה עצמה</p>
-            <h2 className="h-display">חיתוך נקי. התאמה מדויקת. אטימה נכונה.</h2>
+            <h2 className="h-display">עבודה נקייה, מהחיתוך ועד האטימה.</h2>
           </div>
           <ol className="cs-steps">
             {STEPS.map((s, i) => (

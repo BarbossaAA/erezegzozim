@@ -31,7 +31,7 @@ export default function StickyBar() {
       inert={!visible}
     >
       <a href="#booking" className="primary">
-        קבע בדיקה
+        קבעו בדיקה
       </a>
       <a href={SITE.whatsappHref} target="_blank" rel="noopener noreferrer">
         וואטסאפ

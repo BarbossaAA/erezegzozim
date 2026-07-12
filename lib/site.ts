@@ -17,7 +17,7 @@ export const SITE = {
   phoneLandHref: "tel:+97239643086",
   whatsappHref:
     "https://wa.me/972545955580?text=" +
-    encodeURIComponent("היי, יש לי רעש/בעיה באגזוז. מצרף סרטון של הרעש."),
+    encodeURIComponent("היי, יש לי רעש או בעיה באגזוז. אשלח סרטון של הרעש."),
   wazeHref: "https://waze.com/ul?q=" + encodeURIComponent("משה בקר 18, ראשון לציון"),
   hours: "א׳–ה׳ 08:00–17:00 · ו׳ 08:00–13:00",
 } as const;

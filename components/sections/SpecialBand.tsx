@@ -10,25 +10,42 @@ const WORKS = [
   {
     img: "/media/still-classic.webp",
     title: "נאמן למקור",
-    desc: "רכבים שיצאו מהייצור לפני עשורים — המערכת משוחזרת לפי המסלול והצליל המקוריים.",
+    desc: "כשמדובר ברכב שירד מפס הייצור לפני עשרות שנים, אנחנו משחזרים את המערכת לפי המסלול והצליל המקוריים.",
     alt: "מכונית אספנות קלאסית על הליפט במוסך, מערכת פליטה בנויה בעבודת יד",
   },
   {
     img: "/media/still-4x4.webp",
     title: "בנוי לשטח",
-    desc: "מסלול צנרת עם מרווח גחון, זוויות נכונות ותושבות שמחזיקות גם אחרי המהמורה המאה.",
+    desc: "לרכבי שטח מוגבהים אנחנו בונים מסלול צנרת עם מרווח גחון מלא ותושבות מחוזקות שמחזיקות גם בשטח קשה.",
     alt: "רכב שטח מוגבה על הליפט, מסלול אגזוז מותאם לאורך השלדה",
   },
   {
     img: "/media/still-bench.webp",
     title: "מהשרטוט למתכת",
-    desc: "כיפוף, התאמה וריתוך של צנרת למידה — כל קשת נמדדת לרכב אחד בלבד.",
+    desc: "כל עבודה מתחילה במדידה ובשרטוט, וממשיכה בכיפוף ובריתוך מדויקים — עד שהמערכת יושבת ברכב כאילו יוצרה עבורו במפעל.",
     alt: "שולחן עבודה עם צינורות מכופפים, שרטוט טכני וכלי מדידה",
   },
 ];
 
-/** Custom-works teaser band on the home page; links to the full page. */
-export default function SpecialBand() {
+type Props = {
+  kicker?: string;
+  title?: string;
+  sub?: string;
+  video?: string;
+  poster?: string;
+  /** hide the "לעבודות המיוחדות" link (e.g. when rendered on /custom itself) */
+  showLink?: boolean;
+};
+
+/** Custom-works band. Defaults fit the home page; /custom passes its own copy. */
+export default function SpecialBand({
+  kicker = "כשאין חלק מדף",
+  title = "יש מערכות שצריך פשוט לבנות.",
+  sub = "לרכבי אספנות, לרכבי שטח ולרכבים מיוחדים לא תמיד יש פתרון מדף. במקרים כאלה אנחנו בונים את המערכת בעצמנו — מכופפים את הצנרת לפי מידה, מתאימים את המסלול לרכב ושומרים על הצליל שלו.",
+  video = "/media/build.mp4",
+  poster = "/media/build-poster.webp",
+  showLink = true,
+}: Props) {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -67,22 +84,15 @@ export default function SpecialBand() {
       aria-label="עבודות בהתאמה אישית"
     >
       <div className="sb-media" aria-hidden="true">
-        <AutoVideo
-          src="/media/build.mp4"
-          poster="/media/build-poster.webp"
-          className="sb-video"
-        />
+        <AutoVideo src={video} poster={poster} className="sb-video" />
         <div className="sb-overlay" />
       </div>
 
       <div className="container">
         <div className="sb-copy">
-          <p className="kicker">כשאין חלק מדף</p>
-          <h2 className="h-display">יש מערכות שצריך פשוט לבנות.</h2>
-          <p className="h-sub">
-            אספנות, שטח ורכבים מיוחדים — צנרת שמכופפים למידה, מסלול שמותווה
-            מחדש, צליל שמשחזרים בקשב.
-          </p>
+          <p className="kicker">{kicker}</p>
+          <h2 className="h-display">{title}</h2>
+          <p className="h-sub">{sub}</p>
         </div>
 
         <ul className="sb-grid">
@@ -97,11 +107,13 @@ export default function SpecialBand() {
           ))}
         </ul>
 
-        <div className="sb-more">
-          <Link href="/custom" className="btn btn-ghost">
-            לעבודות המיוחדות ←
-          </Link>
-        </div>
+        {showLink && (
+          <div className="sb-more">
+            <Link href="/custom" className="btn btn-ghost">
+              לעבודות המיוחדות ←
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

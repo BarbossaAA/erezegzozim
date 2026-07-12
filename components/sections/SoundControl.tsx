@@ -118,10 +118,10 @@ export default function SoundControl() {
     <section className="sound section" aria-label="שליטה ברעש">
       <div className="container">
         <p className="kicker">שליטה בצליל</p>
-        <h2 className="h-display">לא כל רעש הוא כוח.</h2>
+        <h2 className="h-display">ככה נראה ההבדל בצליל.</h2>
         <p className="h-sub">
-          מערכת פליטה תקינה מאזנת בין זרימה, שקט, בטיחות וחוקיות. אנחנו מטפלים
-          ברעש, ריח ורעידות בצורה שמתאימה לרכב ולכביש.
+          מערכת פליטה תקינה שומרת על איזון בין זרימה, שקט ובטיחות. ההדמיה
+          ממחישה איך הרכב נשמע לפני הטיפול ואחריו, במצבי נסיעה שונים.
         </p>
 
         <div className="sound-stage">
