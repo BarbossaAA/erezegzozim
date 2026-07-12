@@ -671,10 +671,18 @@
   transform: translateX(-50%);
 }
 .faq-item.is-open .faq-plus::after { transform: translateX(-50%) scaleY(0); }
+/* grid 0fr→1fr accordion: content-height animation with zero JS measurement */
 .faq-a {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-cine);
+}
+.faq-item.is-open .faq-a {
+  grid-template-rows: 1fr;
+}
+.faq-a-inner {
+  min-height: 0;
   overflow: hidden;
-  transition: max-height 0.5s var(--ease-cine);
 }
 .faq-a p {
   padding: 0 22px 20px;

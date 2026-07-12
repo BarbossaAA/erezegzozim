@@ -10,8 +10,9 @@
     "macro": "52eac7fd-51a5-4a99-80b7-f8644216f09c",
     "smoke": "9881f505-20ba-4c34-9c0d-596a9c895b55",
     "exploded": "00e2adef-dd80-4417-992f-01c49ad1d66e",
-    "weld": "34055739-885c-4654-ab5c-9549f6a62524"
+    "weld": "d57dff17-bc7c-4e59-9bb1-ed027f1f1411"
   },
+  "weldClipNote": "public/media/weld.mp4 is encoded from job d57dff17 (lamp-sweep b-roll, assets-src/lampsweep.mp4). Rejected as too AI-looking: 34055739 (welding arc), acf00bf2 (gloved-hands fitting, assets-src/fitting.mp4).",
   "stills": {
     "handsClamp": "1ef6fb22-517f-4953-b3f7-46eb51f4d539",
     "weldBead": "30b17715-b966-4ad1-948c-953da8e79244",

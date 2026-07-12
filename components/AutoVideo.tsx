@@ -37,9 +37,10 @@ export default function AutoVideo({
     video.defaultMuted = true;
 
     if (eager) {
+      // start immediately — but still fall through to the observer below so
+      // the loop pauses when the hero scrolls far out of view
       if (!video.src) video.src = src;
       video.play().catch(() => {});
-      return;
     }
 
     const io = new IntersectionObserver(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 const FAQ = [
   {
@@ -33,10 +33,13 @@ const FAQ = [
   },
 ];
 
-/** 13. FAQ — accessible accordion, readability first. */
+/**
+ * Accessible accordion. Expansion animates via the CSS grid 0fr→1fr
+ * pattern, so answers never clip after resize/rotation/zoom — no JS
+ * measurement involved.
+ */
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(0);
-  const refs = useRef<(HTMLDivElement | null)[]>([]);
 
   return (
     <section className="faq section" aria-label="שאלות נפוצות">
@@ -66,16 +69,10 @@ export default function Faq() {
                   role="region"
                   aria-labelledby={`faq-btn-${i}`}
                   className="faq-a"
-                  ref={(el) => {
-                    refs.current[i] = el;
-                  }}
-                  style={{
-                    maxHeight: isOpen
-                      ? `${refs.current[i]?.scrollHeight ?? 400}px`
-                      : "0px",
-                  }}
                 >
-                  <p>{item.a}</p>
+                  <div className="faq-a-inner">
+                    <p>{item.a}</p>
+                  </div>
                 </div>
               </div>
             );

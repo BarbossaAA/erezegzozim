@@ -17,6 +17,13 @@ import { SITE } from "@/lib/site";
 export default function Page() {
   return (
     <>
+      {/* LCP poster for this page — React hoists the link into <head> */}
+      <link
+        rel="preload"
+        as="image"
+        href="/media/hero-poster.webp"
+        fetchPriority="high"
+      />
       <SmoothScroll />
       <CinematicChrome />
       <Header />

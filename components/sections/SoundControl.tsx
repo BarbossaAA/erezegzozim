@@ -33,11 +33,15 @@ export default function SoundControl() {
   const [mode, setMode] = useState<Mode>("idle");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const current = useRef({ amp: 16, noise: 10, freq: 0.05 });
+  const drawRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const target = PARAMS[phase][mode];
     if (prefersReducedMotion()) {
+      // no animation loop under reduced motion — repaint once so the
+      // toggles still visibly change the waveform
       current.current = { ...target };
+      drawRef.current();
       return;
     }
     gsap.to(current.current, {
@@ -102,7 +106,9 @@ export default function SoundControl() {
       t += 0.016;
       if (!reduced && visible) raf = requestAnimationFrame(draw);
     };
-    const io = new IntersectionObserver(([entry]) => {
+    drawRef.current = draw;
+    const io = new IntersectionObserver((entries) => {
+      const entry = entries[entries.length - 1];
       const was = visible;
       visible = entry.isIntersecting;
       if (visible && (!was || reduced)) draw();

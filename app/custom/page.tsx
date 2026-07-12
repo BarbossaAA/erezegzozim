@@ -16,11 +16,41 @@ export const metadata: Metadata = {
   description:
     "מערכות פליטה בבנייה אישית לרכבי אספנות, רכבי שטח ורכבים מיוחדים: כיפוף צנרת לפי מידה, שחזור מסלול מקורי, ריתוך והתאמה — חוקי ובטוח לכביש. ארז אגזוזים, ראשון לציון.",
   alternates: { canonical: "/custom" },
+  openGraph: {
+    title: "עבודות מיוחדות | ארז אגזוזים",
+    description:
+      "כשאין חלק מדף — בונים אותו: מערכות פליטה בהתאמה אישית לרכבי אספנות, שטח ורכבים מיוחדים.",
+    locale: "he_IL",
+    type: "website",
+    url: "/custom",
+    images: [
+      {
+        url: "/media/still-classic.webp",
+        width: 1600,
+        height: 896,
+        alt: "רכב אספנות על הליפט במוסך ארז אגזוזים",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "עבודות מיוחדות | ארז אגזוזים",
+    description:
+      "מערכות פליטה בהתאמה אישית לרכבי אספנות, שטח ורכבים מיוחדים — כיפוף, ריתוך ובנייה לפי מידה.",
+    images: ["/media/still-classic.webp"],
+  },
 };
 
 export default function CustomPage() {
   return (
     <>
+      {/* LCP poster for this page — React hoists the link into <head> */}
+      <link
+        rel="preload"
+        as="image"
+        href="/media/build-poster.webp"
+        fetchPriority="high"
+      />
       <SmoothScroll />
       <CinematicChrome />
       <Header />
@@ -31,7 +61,7 @@ export default function CustomPage() {
           kicker="עבודות מיוחדות"
           title="את המערכות האלה לא קונים — בונים אותן."
           sub="מדידה על הרכב, כיפוף צנרת וריתוך בעבודת יד, עד שהמערכת יושבת כאילו יצאה מהמפעל. זו עבודה איטית יותר, ואנחנו אוהבים אותה."
-          primary={{ href: "/#booking", label: "דברו איתנו על הרכב" }}
+          primary={{ href: "#booking", label: "דברו איתנו על הרכב" }}
           tall={false}
         />
         <SpecialBand

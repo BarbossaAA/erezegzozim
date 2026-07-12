@@ -112,13 +112,20 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} ${suez.variable}`}>
       <body>
-        {/* LCP assets — React hoists these into <head> */}
-        <link
-          rel="preload"
-          as="image"
-          href="/media/hero-poster.webp"
-          fetchPriority="high"
-        />
+        {/* without JS, reveal everything the entrance animations would */}
+        <noscript>
+          <style>{`
+            .hv-kicker, .hv-title .word, .hv-sub, .hv-ctas, .hv-chips, .hv-hint,
+            .rs-node, .sf-head, .sf-chips, .sf-panel, .sb-copy, .sb-card,
+            .tc-head, .tc-photos, .tc-chip, .tc-case, .cw-copy, .cw-card,
+            .mb-visual, .mb-copy, .cs-copy, .cs-step, .cs-visual,
+            .sc-head, .sc-case, .services-head, .service-card, .rs-copy,
+            .cta-inner > * { opacity: 1 !important; transform: none !important; }
+            .hv-bar { display: none !important; }
+            .sticky-bar { opacity: 1 !important; visibility: visible !important; translate: 0 0 !important; }
+            .faq-a { grid-template-rows: 1fr !important; }
+          `}</style>
+        </noscript>
         <a href="#main" className="skip-link">
           דילוג לתוכן הראשי
         </a>

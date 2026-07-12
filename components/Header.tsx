@@ -36,7 +36,7 @@ export default function Header() {
         <a href={SITE.phoneMobileHref} className="header-phone" dir="ltr">
           {SITE.phoneMobile}
         </a>
-        <a href="/#booking" className="btn btn-primary header-cta">
+        <a href="#booking" className="btn btn-primary header-cta">
           קבעו בדיקת אגזוז
         </a>
       </div>
