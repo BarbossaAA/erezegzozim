@@ -17,7 +17,7 @@ no pinned/scroll-scrubbed scenes. Ambient footage is lazy-loaded looping MP4s
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run dev        # http://localhost:3003
 ```
 
 ## Build & deploy
