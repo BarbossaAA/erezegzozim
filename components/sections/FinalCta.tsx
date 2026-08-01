@@ -75,9 +75,12 @@ export default function FinalCta() {
 
       <div className="container cta-inner">
         <p className="kicker">השלב הבא</p>
-        <h2 className="h-display">הרכב משמיע רעש? בואו נבדוק אותו.</h2>
+        <h2 className="h-display">
+          הרכב משמיע רעש? נכשל בטסט על זיהום אוויר? בואו נבדוק אותו.
+        </h2>
         <p className="h-sub">
-          בדיקה קצרה אצלנו יכולה לחסוך לכם רעש, ריח, רעידות ותיקונים חוזרים.
+          בדיקה קצרה אצלנו, ללא עלות, יכולה לחסוך לכם רעש, ריח, רעידות ותיקונים
+          חוזרים.
         </p>
         <div className="cta-actions">
           <a href={SITE.phoneMobileHref} className="btn btn-primary">

@@ -7,13 +7,13 @@ import AutoVideo from "@/components/AutoVideo";
 
 const SERVICES: { title: string; desc: string; texture?: string }[] = [
   {
-    title: "איתור נזילות פליטה",
-    desc: "בדיקה יסודית של החיבורים, הצנרת, הריתוכים והדודים עד שמוצאים את מקור הנזילה.",
+    title: "איתור דליפות פליטה",
+    desc: "בדיקה יסודית של החיבורים, הצנרת, הריתוכים והדודים עד שמוצאים את מקור הדליפה.",
     texture: "/media/still-catalytic.webp",
   },
   {
     title: "תיקון והחלפת אגזוזים",
-    desc: "טיפול ברעש חריג, בחלודה, בחיבורים רופפים ובאגזוזים פגומים.",
+    desc: "טיפול ברעש חריג, בחיבורים רופפים ובאגזוזים פגומים.",
     texture: "/media/still-muffler.webp",
   },
   {
@@ -23,7 +23,7 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
   },
   {
     title: "צינור גמיש לרכב",
-    desc: "טיפול ברעידות, נזילות ורעשי פליטה מאזור החיבור הגמיש.",
+    desc: "טיפול ברעידות, דליפות ורעשי פליטה מאזור החיבור הגמיש.",
     texture: "/media/still-flex.webp",
   },
   {
@@ -32,18 +32,13 @@ const SERVICES: { title: string; desc: string; texture?: string }[] = [
     texture: "/media/still-weld.webp",
   },
   {
-    title: "תושבות ומתלי אגזוז",
-    desc: "ייצוב המערכת ומניעת דפיקות, רעידות ושחיקה חוזרת.",
-    texture: "/media/still-hands.webp",
-  },
-  {
     title: "בדיקת ממיר קטליטי",
     desc: "בדיקת תקינות הממיר וזרימת הגזים, ואיתור תקלות שמעלות את ערכי הפליטה.",
     texture: "/media/still-catalytic.webp",
   },
   {
-    title: "הכנה לטסט",
-    desc: "בדיקת רעש, אטימות ומצב כללי של המערכת לפני מבחן הרישוי.",
+    title: "פתרונות זיהום אוויר",
+    desc: "איתור וטיפול בגורמים לערכי פליטה חריגים במערכת הפליטה של הרכב.",
     texture: "/media/still-lamp.webp",
   },
   {

@@ -18,9 +18,9 @@ export default function Footer() {
             <li>דודים</li>
             <li>צינור גמיש</li>
             <li>ריתוך</li>
-            <li>נזילות פליטה</li>
+            <li>דליפות פליטה</li>
             <li>ממירים קטליטיים</li>
-            <li>הכנה לטסט</li>
+            <li>פתרונות זיהום אוויר</li>
             <li>מערכות בהתאמה אישית</li>
             <li>אספנות, שטח ורכבים מיוחדים</li>
           </ul>
@@ -56,7 +56,8 @@ export default function Footer() {
         <div className="footer-col">
           <p className="footer-title">איך אנחנו עובדים</p>
           <ul>
-            <li>עבודה בטוחה לכביש</li>
+            <li>40 שנה ניסיון</li>
+            <li>בדיקה ללא עלות</li>
             <li>אבחון לפני החלפה</li>
             <li>אחריות לפי סוג עבודה</li>
           </ul>

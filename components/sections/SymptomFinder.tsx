@@ -8,44 +8,20 @@ import { SITE } from "@/lib/site";
 
 const PAIRS: { symptom: string; diagnosis: string; detail: string }[] = [
   {
-    symptom: "רעש מתכתי בהאצה",
-    diagnosis: "תושבת אגזוז שבורה",
-    detail: "כשתושבת נשברת, המערכת משתחררת ממקומה ונוקשת בתחתית הרכב בכל האצה.",
+    symptom: "הרכב לא סוחב",
+    diagnosis: "ממיר קטליטי סתום",
+    detail: "יכול להיות ממיר קטליטי סתום.",
   },
   {
-    symptom: "אגזוז מרעיש בסרק",
-    diagnosis: "דוד שהתפרק מבפנים",
-    detail: "כשהמחיצות הפנימיות של הדוד מתפרקות, הצליל משתנה ונשמע גם כשהמנוע בסרק.",
+    symptom: "רעש צורם או לא רגיל",
+    diagnosis: "שבר או סדק במערכת הפליטה",
+    detail: "כנראה שבר או סדק במערכת הפליטה.",
   },
   {
-    symptom: "ריח גזים ברכב",
-    diagnosis: "נזילת פליטה",
-    detail: "נזילת פליטה לפני תא הנוסעים עלולה להחדיר גזים פנימה — תקלה שחשוב לטפל בה מיד.",
-  },
-  {
-    symptom: "דפיקה מתחת לרכב",
-    diagnosis: "התקנה לא מיושרת",
-    detail: "מערכת שהותקנה בלי יישור מדויק נוגעת בשלדה ודופקת בכל מהמורה.",
-  },
-  {
-    symptom: "שריקה בנסיעה",
-    diagnosis: "חיבור לא אטום",
-    detail: "גזים שנדחפים דרך סדק צר יוצרים שריקה שמתגברת ככל שהמנוע עולה בסיבובים.",
-  },
-  {
-    symptom: "רעידות אחרי התנעה",
-    diagnosis: "צינור גמיש קרוע",
-    detail: "הצינור הגמיש סופג את תנועות המנוע. כשהוא נקרע, הרעידות עוברות ישירות לשלדה.",
-  },
-  {
-    symptom: "כישלון בטסט",
-    diagnosis: "ממיר שדורש בדיקה",
-    detail: "ערכי פליטה חריגים בטסט מתחילים ברוב המקרים בממיר הקטליטי או בחיישנים שסביבו.",
-  },
-  {
-    symptom: "אגזוז נמוך / נוגע",
-    diagnosis: "צנרת חלודה",
-    detail: "חלודה מחלישה את נקודות העיגון, המערכת שוקעת בהדרגה ועלולה לגעת בכביש.",
+    symptom: "נכשלתם בטסט על זיהום אוויר?",
+    diagnosis: "מקורות אפשריים במערכת הפליטה",
+    detail:
+      "יכול להיות הרבה סיבות שקשורות למערכת הפליטה. תגיעו לבדיקה ללא עלות ונשמח לבדוק בשבילכם.",
   },
 ];
 
@@ -106,12 +82,12 @@ export default function SymptomFinder() {
       ref={sectionRef}
       id="symptoms"
       className="sf section-tight"
-      aria-label="מה אתם שומעים?"
+      aria-label="מה הבעיה?"
     >
       <div className="container">
         <div className="sf-head">
           <p className="kicker">אבחון מהיר</p>
-          <h2 className="h-display">מה אתם שומעים?</h2>
+          <h2 className="h-display">מה הבעיה?</h2>
         </div>
 
         <div className="sf-stage">
@@ -119,7 +95,7 @@ export default function SymptomFinder() {
             className="sf-chips"
             ref={listRef}
             role="tablist"
-            aria-label="סימפטומים נפוצים"
+            aria-label="בעיות נפוצות"
             aria-orientation="vertical"
             onKeyDown={onTablistKeyDown}
           >
@@ -154,7 +130,7 @@ export default function SymptomFinder() {
               />
             </div>
             <div className="sf-body">
-              <p className="sf-kicker">האבחנה הראשונית</p>
+              <p className="sf-kicker">סיבה אפשרית</p>
               <h3>{pair.diagnosis}</h3>
               <p className="sf-detail">{pair.detail}</p>
             </div>
@@ -171,7 +147,9 @@ export default function SymptomFinder() {
                 {SITE.phoneMobile}
               </a>
             </div>
-            <p className="sf-footnote">את האבחון הסופי אנחנו עושים בבדיקה פיזית מתחת לרכב.</p>
+            <p className="sf-footnote">
+              את האבחון הסופי אנחנו עושים בבדיקה פיזית מתחת לרכב — ללא עלות.
+            </p>
           </div>
         </div>
       </div>
